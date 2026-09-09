@@ -1,10 +1,16 @@
-<div align="center">
-  <a href="README.md"><img src="https://img.shields.io/badge/中文-README-blue?style=for-the-badge" alt="中文"></a>
-</div>
+> [!WARNING]
+> ### ⚠️ Critical: Server Shutdown & Linear / b_linear Region Formats
+>
+> If you are using any Linear region format (**Linear v1, v2, v3** or **b_linear**), **NEVER force-kill (`kill -9`, `SIGKILL`, panel crash/stop buttons)** the server process!
+>
+> Always shut down or restart cleanly using `/stop` or `/restart`.
+>
+> **Known risks and limitations with Linear formats:**
+> - **Catastrophic Chunk / Region Corruption:** Linear formats buffer and compress chunks into shared Zstandard/LZ4 data blocks rather than separate Anvil `.mca` sector slots. Abruptly terminating the process while a flush or write-ahead-log (WAL) sync is in progress can corrupt entire region files (up to 1,024 chunks at once).
+> - **Data Loss on Hard Crashes:** If the host machine loses power, suffers an OOM-killer termination, or is abruptly stopped without executing shutdown hooks, unwritten in-memory chunk buffers cannot be recovered.
+> - **Incompatibility & Tooling Issues:** Linear v3 and non-standard specifications are not supported by external tools (such as map renderers like Dynmap/BlueMap, world converters, or NBT editors). Always keep reliable backups before migrating.
 
 <div align="center">
-  <img src="./public/image/Liahtina_LL_wide_white.png" alt="Liahtina Logo" width="400">
-
   <h1>Liahtina</h1>
   <p><strong>A high-performance fork of Folia</strong></p>
   <p>Tracking Mojang's latest Minecraft versions with Bukkit plugin compatibility and vanilla feature restoration</p>
@@ -21,9 +27,7 @@
 
 ## Disclaimer
 
-> The original Luminol project was developed by **EarthME**, but was archived due to personal reasons.
->
-> The technology stack may change in the future to **Luminol + ported patches + modifications** (current stack: **Folia + ported patches + modifications**).
+> The original Luminol project was developed by **EarthME**, but was archived due to personal reasons. This version aims to adapt to Mojang's latest Minecraft versions.
 >
 > Due to the **GNU GPL V3.0** open source license requirements, any modifications, derivatives, or distributions based on this project must be released under the same open source license in full.
 
@@ -35,7 +39,7 @@
 |----------|---------|-------------|--------|
 | **Compat** | Bukkit Plugin Compat | `FoliaSchedulerCompatibility` auto-detects plugin scheduling needs, bridges to Folia region scheduler or falls back | Implemented |
 | **Compat** | Async Protocol Switch | Async login/config/game protocol switching, reducing main thread blocking | Implemented |
-| **Config** | Complete Config Framework | TOML config auto-loading, compatible with Luminol 26.1.2 structure | Implemented |
+| **Config** | Complete Config Framework | TOML config auto-loading, structured configuration support, custom brand names | Implemented |
 | **Fixes** | Collision Behavior | Configurable VANILLA / PAPER / BLOCK_SHAPE_VANILLA collision detection | Implemented |
 | **Fixes** | Pathfinding Fixes | Detects cross-region pathfinding and delays recomputation | Implemented |
 | **Fixes** | High Velocity Fix | Detects cross-region entity movement and handles via teleportAsync | Implemented |
@@ -72,8 +76,8 @@
 | **Minecraft** | 26.2 | Upstream Mojang version |
 | **Folia** | 26.2 | Regionized multi-threaded server core |
 | **Paper** | `1569b8dc` ref | Upstream Paper commit |
-| **Luminol** | `ba28403f` ref | Luminol 26.1.2 reference commit |
-| **Arbor** | 26.2 | Feature reference and code porting based on Luminol |
+| **Luminol** | `ba28403f` ref | Reference commit |
+| **Arbor** | 26.2 | Feature reference and code porting |
 | **Java** | 25 | Compile and runtime JDK |
 | **Gradle** | 9.x | Build tool (wrapper included) |
 | **Paperweight Patcher** | 2.0.0-beta.21 | Patch application and project management plugin |
@@ -104,7 +108,7 @@ cd Liahtina
 .\gradlew.bat applyAllPatches          # Windows
 ./gradlew applyAllPatches              # Linux / macOS
 
-# ⚠️ REQUIRED: restore committed source modifications (lava fix + B_LINEAR/LINEAR_V2 region support)
+# REQUIRED: restore committed source modifications
 # applyAllPatches overwrites src/minecraft/java with decompiled sources — DO NOT SKIP this step!
 git checkout -- liahtina-server/src/minecraft/java/   # required on all platforms
 
@@ -113,14 +117,14 @@ git checkout -- liahtina-server/src/minecraft/java/   # required on all platform
 ./gradlew createPaperclipJar           # Linux / macOS
 ```
 
-The `applyAllPatches` task will: pull upstream Paper 26.2 source via `paperRef` → apply `liahtina-api/paper-patches` → apply `liahtina-server/{paper,minecraft,luminol}-patches` → merge the Luminol core sources under `src/main/java` into the compile path.
+The `applyAllPatches` task will: pull upstream Paper 26.2 source via `paperRef` → apply `liahtina-api/paper-patches` → apply `liahtina-server/{paper,minecraft,luminol}-patches` → merge the core sources under `src/main/java` into the compile path.
 
-> **⚠️ Important** : `applyAllPatches` resets `liahtina-server/src/minecraft/java/` to the upstream decompiled sources. Any changes committed directly in that directory (lava damage fix, B_LINEAR / LINEAR_V2 region format support, etc.) will be lost. **You MUST run `git checkout -- liahtina-server/src/minecraft/java/` BEFORE `createPaperclipJar`**, otherwise the built JAR will be missing these modifications.
+> **Important** : `applyAllPatches` resets `liahtina-server/src/minecraft/java/` to the upstream decompiled sources. Any changes committed directly in that directory will be lost. **You MUST run `git checkout -- liahtina-server/src/minecraft/java/` BEFORE `createPaperclipJar`**, otherwise the built JAR will be missing these modifications.
 
 ### One-click Build
 
 ```bash
-# NOTE: the git checkout step CANNOT be skipped. Run each command separately as shown:
+# Run each command separately:
 .\gradlew.bat applyAllPatches
 git checkout -- liahtina-server/src/minecraft/java/
 .\gradlew.bat createPaperclipJar
@@ -151,7 +155,6 @@ liahtina-server/build/libs/liahtina-paperclip-26.2.0-R0.1-SNAPSHOT.jar
 Rename the Paperclip JAR and drop it into your server directory:
 
 ```bash
-# Rename to the name expected by start.bat
 copy liahtina-paperclip-26.2.0-R0.1-SNAPSHOT.jar D:\SkyServer\liahtina-26.2.jar
 ```
 
@@ -177,7 +180,7 @@ This project maintains three patch layers via Paperweight, all under `liahtina-s
 
 ## Configuration
 
-On first startup, the server automatically generates a `luminol_config/` configuration directory.
+On first startup, the server automatically generates a `liahtina_config/` configuration directory.
 
 ### Configuration Files
 
@@ -226,7 +229,6 @@ name: Liahtina
 # Force vanilla brand name (overrides plugins and this config)
 vanilla_spoof: false
 ```
-```
 
 ### Example: `disable_check_for_folia_supported.yml`
 
@@ -264,14 +266,13 @@ This project is licensed under the **GNU General Public License v3.0**. See [LIC
 |-------------|------|
 | **EarthME** | Original Luminol project author |
 | **PaperMC** | Folia and Paper server framework |
-| **Arbor** | Luminol-based secondary development, providing feature reference and code porting |
-| **LightingLuminol** | Vanilla feature restoration layer |
-| **BakaSky** | BakaFork branch maintainer |
+| **Arbor** | Secondary development, providing feature reference and code porting |
+| **Liahtina** | Vanilla feature restoration layer |
+| **Flugobjekt** | Project maintainer |
 
 ---
 
 <div align="center">
-  <p><sub>Built by BakaSky -- Licensed under GPLv3</sub></p>
   <p>
     <a href="https://github.com/Flugobjekt/Liahtina">Repository</a>
     &nbsp;&middot;&nbsp;
@@ -280,9 +281,3 @@ This project is licensed under the **GNU General Public License v3.0**. See [LIC
     <a href="https://github.com/Flugobjekt/Liahtina/releases">Releases</a>
   </p>
 </div>
-
----
-
-![Renegade Cow](public/image/renegadecow.png)
-
-**This Project has a Super Cow Power**
