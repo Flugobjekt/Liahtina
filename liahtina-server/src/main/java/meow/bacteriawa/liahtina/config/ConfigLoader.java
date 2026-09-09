@@ -208,20 +208,21 @@ public final class ConfigLoader {
                 "\t# Region file format to use for world saving.\n" +
                 "\t# Available choices: MCA, LINEAR_V2, LINEAR_V3, LINEAR, B_LINEAR\n" +
                 "\t# - MCA: Standard Minecraft Anvil format (.mca)\n" +
-                "\t# - LINEAR_V2 / LINEAR_V3 / LINEAR: Linear region format (header version 3 specification with bucket compression, .linear)\n" +
+                "\t# - LINEAR_V2: Linear format v2 with bucket compression and bitmap (.linear)\n" +
+                "\t# - LINEAR_V3 / LINEAR: Linear format v3 with reduced header overhead and direct bucket hashes (.linear)\n" +
                 "\t# - B_LINEAR: Buffered Linear region format with asynchronous flush (.b_linear)\n" +
                 "\tformat = \"MCA\"\n" +
                 "\t# Decides the compression level of the region file (1-22, default is 1)\n" +
-                "\t# Only works for Linear and B_LINEAR\n" +
+                "\t# Works for LINEAR_V2, LINEAR_V3, and B_LINEAR\n" +
                 "\tlinear_compression_level = 1\n" +
                 "\t# Flush delay in milliseconds after region file is marked to save (default is 100)\n" +
-                "\t# Only works for Linear\n" +
+                "\t# Works for LINEAR_V2 and LINEAR_V3\n" +
                 "\tlinear_io_flush_delay_ms = 100\n" +
                 "\t# Worker thread count for Linear region IO (default is 6)\n" +
-                "\t# Only works for Linear\n" +
+                "\t# Works for LINEAR_V2 and LINEAR_V3\n" +
                 "\tlinear_io_thread_count = 6\n" +
                 "\t# Whether to use Java virtual threads for Linear region IO (default is true)\n" +
-                "\t# Only works for Linear\n" +
+                "\t# Works for LINEAR_V2 and LINEAR_V3\n" +
                 "\tlinear_use_virtual_thread = true\n" +
                 "\t# Flush delay in milliseconds when there have been no write operations (default is 3000)\n" +
                 "\t# Only works for B_LINEAR\n" +

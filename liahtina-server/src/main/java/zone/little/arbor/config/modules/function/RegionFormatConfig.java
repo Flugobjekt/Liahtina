@@ -31,9 +31,13 @@ public class RegionFormatConfig {
                 regionFormat = EnumRegionFormat.B_LINEAR;
                 break;
             case "LINEAR_V3":
+                regionFormat = EnumRegionFormat.LINEAR_V3;
+                break;
             case "LINEAR_V2":
-            case "LINEAR":
                 regionFormat = EnumRegionFormat.LINEAR_V2;
+                break;
+            case "LINEAR":
+                regionFormat = EnumRegionFormat.LINEAR_V3;
                 break;
             case "MCA":
             default:
@@ -41,7 +45,7 @@ public class RegionFormatConfig {
                 break;
         }
 
-        if (regionFormat == EnumRegionFormat.LINEAR_V2) {
+        if (regionFormat == EnumRegionFormat.LINEAR_V2 || regionFormat == EnumRegionFormat.LINEAR_V3) {
             checkCompressionLevel();
             LinearRegionFile.SAVE_DELAY_MS = linearIoFlushDelayMs;
             LinearRegionFile.SAVE_THREAD_MAX_COUNT = linearIoThreadCount;

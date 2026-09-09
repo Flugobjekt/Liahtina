@@ -8,7 +8,8 @@ import net.minecraft.world.level.chunk.storage.RegionFile;
 
 public enum EnumRegionFormat {
     MCA("mca", (info) -> new RegionFile(info.info(), info.filePath(), info.folder(), info.sync())),
-    LINEAR_V2("linear", (info) -> new LinearRegionFile(info.info(), info.filePath(), info.folder(), info.sync(), RegionFormatConfig.linearCompressionLevel)),
+    LINEAR_V2("linear", (info) -> new LinearRegionFile(info.info(), info.filePath(), info.folder(), info.sync(), RegionFormatConfig.linearCompressionLevel, LinearRegionFile.VERSION_V2)),
+    LINEAR_V3("linear", (info) -> new LinearRegionFile(info.info(), info.filePath(), info.folder(), info.sync(), RegionFormatConfig.linearCompressionLevel, LinearRegionFile.VERSION_V3)),
     B_LINEAR("b_linear", (info) -> new BufferedLinearRegionFile(info.filePath(), RegionFormatConfig.linearCompressionLevel, RegionFormatConfig.blinearFlusher));
 
     private final String argument;

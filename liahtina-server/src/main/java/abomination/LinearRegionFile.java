@@ -28,10 +28,14 @@ import java.util.concurrent.locks.ReentrantLock;
 // Just gonna use this string to inform other forks about updates ;-)
 public class LinearRegionFile implements IRegionFile {
     private static final long SUPERBLOCK = 0xc3ff13183cca9d9aL;
-    private static final byte VERSION = 3;
+    public static final byte VERSION_V2 = 3;
+    public static final byte VERSION_V3 = 4;
     private static final int HEADER_SIZE = 27;
     private static final int FOOTER_SIZE = 8;
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    private final byte linearVersion;
+    private boolean[] loadedChunkExistenceBitmap = null;
 
     private byte[][] bucketBuffers;
     private final byte[][] buffer = new byte[1024][];
@@ -139,6 +143,8 @@ public class LinearRegionFile implements IRegionFile {
                 parseLinearV1(buffer);
             } else if (version == 3) {
                 parseLinearV2(buffer);
+            } else if (version == 4) {
+                parseLinearV3(buffer);
             } else {
                 throw new RuntimeException("Invalid version: " + version + " file " + this.regionFile);
             }
@@ -206,7 +212,7 @@ public class LinearRegionFile implements IRegionFile {
         buffer.getInt(); // Skip region_x (Int)
         buffer.getInt(); // Skip region_z (Int)
 
-        boolean[] chunkExistenceBitmap = deserializeExistenceBitmap(buffer);
+        this.loadedChunkExistenceBitmap = deserializeExistenceBitmap(buffer);
 
         while (true) {
             byte featureNameLength = buffer.get();
@@ -242,11 +248,48 @@ public class LinearRegionFile implements IRegionFile {
             throw new IOException("Footer superblock invalid " + this.regionFile);
     }
 
-    public LinearRegionFile(RegionStorageInfo storageKey, Path directory, Path path, boolean dsync, int compressionLevel) throws IOException {
-        this(storageKey, directory, path, RegionFileVersion.getSelected(), dsync, compressionLevel);
+    private void parseLinearV3(ByteBuffer buffer) throws IOException {
+        gridSize = buffer.get();
+        if (gridSize != 1 && gridSize != 2 && gridSize != 4 && gridSize != 8 && gridSize != 16 && gridSize != 32)
+            throw new RuntimeException("Invalid grid size: " + gridSize + " file " + this.regionFile);
+        bucketSize = 32 / gridSize;
+
+        int bucketCount = gridSize * gridSize;
+        int[] bucketSizes = new int[bucketCount];
+        long[] bucketHashes = new long[bucketCount];
+        for (int i = 0; i < bucketCount; i++) {
+            bucketSizes[i] = buffer.getInt();
+            bucketHashes[i] = buffer.getLong();
+        }
+
+        bucketBuffers = new byte[bucketCount][];
+        for (int i = 0; i < bucketCount; i++) {
+            if (bucketSizes[i] > 0) {
+                bucketBuffers[i] = new byte[bucketSizes[i]];
+                buffer.get(bucketBuffers[i]);
+                long rawHash = LongHashFunction.xx().hashBytes(bucketBuffers[i]);
+                if (rawHash != bucketHashes[i]) throw new IOException("Region file hash incorrect " + this.regionFile);
+            }
+        }
+
+        long footerSuperBlock = buffer.getLong();
+        if (footerSuperBlock != SUPERBLOCK)
+            throw new IOException("Footer superblock invalid " + this.regionFile);
+    }
+
+    public LinearRegionFile(RegionStorageInfo storageKey, Path path, Path directory, boolean dsync, int compressionLevel) throws IOException {
+        this(storageKey, path, directory, RegionFileVersion.getSelected(), dsync, compressionLevel, VERSION_V3);
+    }
+
+    public LinearRegionFile(RegionStorageInfo storageKey, Path path, Path directory, boolean dsync, int compressionLevel, byte linearVersion) throws IOException {
+        this(storageKey, path, directory, RegionFileVersion.getSelected(), dsync, compressionLevel, linearVersion);
     }
 
     public LinearRegionFile(RegionStorageInfo storageKey, Path path, Path directory, RegionFileVersion compressionFormat, boolean dsync, int compressionLevel) throws IOException {
+        this(storageKey, path, directory, compressionFormat, dsync, compressionLevel, VERSION_V3);
+    }
+
+    public LinearRegionFile(RegionStorageInfo storageKey, Path path, Path directory, RegionFileVersion compressionFormat, boolean dsync, int compressionLevel, byte linearVersion) throws IOException {
         Runnable flushCheck = () -> {
             while (!close) {
                 synchronized (saveLock) {
@@ -278,6 +321,7 @@ public class LinearRegionFile implements IRegionFile {
         this.bindThread.setName("Linear IO Schedule - " + this.hashCode());
         this.regionFile = path;
         this.compressionLevel = compressionLevel;
+        this.linearVersion = linearVersion;
 
         this.compressor = LZ4Factory.fastestInstance().fastCompressor();
         this.decompressor = LZ4Factory.fastestInstance().fastDecompressor();
@@ -334,58 +378,15 @@ public class LinearRegionFile implements IRegionFile {
         throw new Exception("doesChunkExist is a stub");
     }
 
-    public synchronized void flush() throws IOException {
-        if (!isMarkedToSave()) return;
-
-        openRegionFile();
-
-        long timestamp = getTimestamp();
-
-        long writeStart = System.nanoTime();
-        File tempFile = new File(regionFile.toString() + ".tmp");
-        FileOutputStream fileStream = new FileOutputStream(tempFile);
-        DataOutputStream dataStream = new DataOutputStream(fileStream);
-
-        dataStream.writeLong(SUPERBLOCK);
-        dataStream.writeByte(VERSION);
-        dataStream.writeLong(timestamp);
-        dataStream.writeByte(gridSize);
-
-        String fileName = regionFile.getFileName().toString();
-        String[] parts = fileName.split("\\.");
-        int regionX = 0;
-        int regionZ = 0;
-        try {
-            if (parts.length >= 4) {
-                regionX = Integer.parseInt(parts[1]);
-                regionZ = Integer.parseInt(parts[2]);
-            } else {
-                LOGGER.warn("Unexpected file name format: " + fileName);
-            }
-        } catch (NumberFormatException e) {
-            LOGGER.error("Failed to parse region coordinates from file name: " + fileName, e);
-        }
-
-        dataStream.writeInt(regionX);
-        dataStream.writeInt(regionZ);
-
-        boolean[] chunkExistenceBitmap = new boolean[1024];
-        for (int i = 0; i < 1024; i++) {
-            chunkExistenceBitmap[i] = (this.bufferUncompressedSize[i] > 0);
-        }
-        writeSerializedExistenceBitmap(dataStream, chunkExistenceBitmap);
-
-        writeNBTFeatures(dataStream);
-
-        int bucketMisses = 0;
+    private byte[][] buildBuckets() throws IOException {
         byte[][] buckets = new byte[gridSize * gridSize][];
         for (int bx = 0; bx < gridSize; bx++) {
             for (int bz = 0; bz < gridSize; bz++) {
-                if (bucketBuffers != null && bucketBuffers[bx * gridSize + bz] != null) {
-                    buckets[bx * gridSize + bz] = bucketBuffers[bx * gridSize + bz];
+                int bucketIdx = bx * gridSize + bz;
+                if (bucketBuffers != null && bucketBuffers[bucketIdx] != null) {
+                    buckets[bucketIdx] = bucketBuffers[bucketIdx];
                     continue;
                 }
-                bucketMisses++;
 
                 ByteArrayOutputStream bucketStream = new ByteArrayOutputStream();
                 ZstdOutputStream zstdStream = new ZstdOutputStream(bucketStream, this.compressionLevel);
@@ -411,28 +412,105 @@ public class LinearRegionFile implements IRegionFile {
                 bucketDataStream.close();
 
                 if (hasData) {
-                    buckets[bx * gridSize + bz] = bucketStream.toByteArray();
+                    buckets[bucketIdx] = bucketStream.toByteArray();
                 }
             }
         }
+        return buckets;
+    }
 
-        for (int i = 0; i < gridSize * gridSize; i++) {
-            dataStream.writeInt(buckets[i] != null ? buckets[i].length : 0);
-            dataStream.writeByte(this.compressionLevel);
-            long rawHash = 0;
-            if (buckets[i] != null) {
-                rawHash = LongHashFunction.xx().hashBytes(buckets[i]);
+    public synchronized void flush() throws IOException {
+        if (!isMarkedToSave()) return;
+
+        openRegionFile();
+
+        long timestamp = getTimestamp();
+
+        File tempFile = new File(regionFile.toString() + ".tmp");
+        FileOutputStream fileStream = new FileOutputStream(tempFile);
+        DataOutputStream dataStream = new DataOutputStream(fileStream);
+
+        byte[][] buckets = buildBuckets();
+        int bucketCount = gridSize * gridSize;
+
+        if (this.linearVersion == VERSION_V3) {
+            dataStream.writeLong(SUPERBLOCK);
+            dataStream.writeByte(VERSION_V3);
+            dataStream.writeByte(gridSize);
+
+            for (int i = 0; i < bucketCount; i++) {
+                dataStream.writeInt(buckets[i] != null ? buckets[i].length : 0);
+                long rawHash = 0;
+                if (buckets[i] != null) {
+                    rawHash = LongHashFunction.xx().hashBytes(buckets[i]);
+                }
+                dataStream.writeLong(rawHash);
             }
-            dataStream.writeLong(rawHash);
-        }
 
-        for (int i = 0; i < gridSize * gridSize; i++) {
-            if (buckets[i] != null) {
-                dataStream.write(buckets[i]);
+            for (int i = 0; i < bucketCount; i++) {
+                if (buckets[i] != null) {
+                    dataStream.write(buckets[i]);
+                }
             }
-        }
 
-        dataStream.writeLong(SUPERBLOCK);
+            dataStream.writeLong(SUPERBLOCK);
+        } else {
+            dataStream.writeLong(SUPERBLOCK);
+            dataStream.writeByte(VERSION_V2);
+            dataStream.writeLong(timestamp);
+            dataStream.writeByte(gridSize);
+
+            String fileName = regionFile.getFileName().toString();
+            String[] parts = fileName.split("\\.");
+            int regionX = 0;
+            int regionZ = 0;
+            try {
+                if (parts.length >= 4) {
+                    regionX = Integer.parseInt(parts[1]);
+                    regionZ = Integer.parseInt(parts[2]);
+                } else {
+                    LOGGER.warn("Unexpected file name format: " + fileName);
+                }
+            } catch (NumberFormatException e) {
+                LOGGER.error("Failed to parse region coordinates from file name: " + fileName, e);
+            }
+
+            dataStream.writeInt(regionX);
+            dataStream.writeInt(regionZ);
+
+            boolean[] chunkExistenceBitmap = new boolean[1024];
+            for (int i = 0; i < 1024; i++) {
+                int chunkX = i & 31;
+                int chunkZ = i >> 5;
+                int bucketIdx = chunkToBucketIdx(chunkX, chunkZ);
+                if (bucketBuffers != null && bucketBuffers[bucketIdx] != null) {
+                    chunkExistenceBitmap[i] = (this.loadedChunkExistenceBitmap != null && this.loadedChunkExistenceBitmap[i]);
+                } else {
+                    chunkExistenceBitmap[i] = (this.bufferUncompressedSize[i] > 0);
+                }
+            }
+            writeSerializedExistenceBitmap(dataStream, chunkExistenceBitmap);
+
+            writeNBTFeatures(dataStream);
+
+            for (int i = 0; i < bucketCount; i++) {
+                dataStream.writeInt(buckets[i] != null ? buckets[i].length : 0);
+                dataStream.writeByte(this.compressionLevel);
+                long rawHash = 0;
+                if (buckets[i] != null) {
+                    rawHash = LongHashFunction.xx().hashBytes(buckets[i]);
+                }
+                dataStream.writeLong(rawHash);
+            }
+
+            for (int i = 0; i < bucketCount; i++) {
+                if (buckets[i] != null) {
+                    dataStream.write(buckets[i]);
+                }
+            }
+
+            dataStream.writeLong(SUPERBLOCK);
+        }
 
         dataStream.flush();
         fileStream.getFD().sync();
@@ -441,7 +519,6 @@ public class LinearRegionFile implements IRegionFile {
 
         fileStream.close();
         Files.move(tempFile.toPath(), this.regionFile, StandardCopyOption.REPLACE_EXISTING);
-//System.out.println("writeStart REGION FILE FLUSH " + (System.nanoTime() - writeStart) + " misses: " + bucketMisses);
     }
 
     private void writeNBTFeatures(DataOutputStream dataStream) throws IOException {
