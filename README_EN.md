@@ -1,18 +1,14 @@
 <div align="center">
-  <a href="README.md"><img src="https://img.shields.io/badge/中文-README-blue?style=for-the-badge" alt="中文"></a>
-</div>
+  <img src="./public/image/Liahtina_LL_wide_white.png" alt="Liahtina Logo" width="400">
 
-<div align="center">
-  <img src="./public/image/LightingLuminol_LL横_白.png" alt="LightingLuminol Logo" width="400">
-
-  <h1>LightingLuminol-BakaFork</h1>
-  <p><strong>A fork of LightingLuminol for Folia</strong></p>
+  <h1>Liahtina</h1>
+  <p><strong>A high-performance fork of Folia</strong></p>
   <p>Tracking Mojang's latest Minecraft versions with Bukkit plugin compatibility and vanilla feature restoration</p>
 
   <p>
-    <a href="https://github.com/Baka-Sky/LightingLuminol-Fork/actions/workflows/build.yml"><img src="https://github.com/Baka-Sky/LightingLuminol-Fork/actions/workflows/build.yml/badge.svg" alt="Actions Build Status"></a>
-    <a href="https://github.com/Baka-Sky/LightingLuminol-Fork/issues"><img src="https://img.shields.io/github/issues/Baka-Sky/LightingLuminol-Fork" alt="GitHub Issues"></a>
-    <a href="https://github.com/Baka-Sky/LightingLuminol-Fork/commits"><img src="https://img.shields.io/github/last-commit/Baka-Sky/LightingLuminol-Fork" alt="Last Commit"></a>
+    <a href="https://github.com/Flugobjekt/Liahtina/actions/workflows/build.yml"><img src="https://github.com/Flugobjekt/Liahtina/actions/workflows/build.yml/badge.svg" alt="Actions Build Status"></a>
+    <a href="https://github.com/Flugobjekt/Liahtina/issues"><img src="https://img.shields.io/github/issues/Flugobjekt/Liahtina" alt="GitHub Issues"></a>
+    <a href="https://github.com/Flugobjekt/Liahtina/commits"><img src="https://img.shields.io/github/last-commit/Flugobjekt/Liahtina" alt="Last Commit"></a>
     <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-GPL--3.0-blue" alt="License"></a>
   </p>
 </div>
@@ -21,13 +17,11 @@
 
 ## Disclaimer
 
-> The original Luminol project was developed by **EarthME**, but was archived due to personal reasons. This BakaFork (Baka-Sky) version is an **unofficial release** aimed at adapting to Mojang's latest Minecraft versions.
->
-> The technology stack may change in the future to **Luminol + ported patches + modifications** (current stack: **Folia + ported patches + modifications**).
+> The original Luminol project was developed by **EarthME**, but was archived due to personal reasons. This version aims to adapt to Mojang's latest Minecraft versions.
 >
 > Due to the **GNU GPL V3.0** open source license requirements, any modifications, derivatives, or distributions based on this project must be released under the same open source license in full.
 >
-> **CanvasMC** (the team primarily responsible for the original repository's archival) -- we will never forget.
+> **CanvasMC** -- we will never forget.
 
 ---
 
@@ -37,7 +31,7 @@
 |----------|---------|-------------|--------|
 | **Compat** | Bukkit Plugin Compat | `FoliaSchedulerCompatibility` auto-detects plugin scheduling needs, bridges to Folia region scheduler or falls back | Implemented |
 | **Compat** | Async Protocol Switch | Async login/config/game protocol switching, reducing main thread blocking | Implemented |
-| **Config** | Complete Config Framework | TOML config auto-loading, compatible with Luminol 26.1.2 structure | Implemented |
+| **Config** | Complete Config Framework | TOML config auto-loading, structured configuration support, custom brand names | Implemented |
 | **Fixes** | Collision Behavior | Configurable VANILLA / PAPER / BLOCK_SHAPE_VANILLA collision detection | Implemented |
 | **Fixes** | Pathfinding Fixes | Detects cross-region pathfinding and delays recomputation | Implemented |
 | **Fixes** | High Velocity Fix | Detects cross-region entity movement and handles via teleportAsync | Implemented |
@@ -73,8 +67,8 @@
 | **Minecraft** | 26.2 | Upstream Mojang version |
 | **Folia** | 26.2 | Regionized multi-threaded server core |
 | **Paper** | `1569b8dc` ref | Upstream Paper commit |
-| **Luminol** | `ba28403f` ref | Luminol 26.1.2 reference commit |
-| **Arbor** | 26.2 | Feature reference and code porting based on Luminol |
+| **Luminol** | `ba28403f` ref | Reference commit |
+| **Arbor** | 26.2 | Feature reference and code porting |
 | **Java** | 25 | Compile and runtime JDK |
 | **Gradle** | 9.x | Build tool (wrapper included) |
 | **Paperweight Patcher** | 2.0.0-beta.21 | Patch application and project management plugin |
@@ -98,32 +92,32 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/Baka-Sky/LightingLuminol-Fork.git
-cd LightingLuminol-Fork
+git clone https://github.com/Flugobjekt/Liahtina.git
+cd Liahtina
 
 # Apply all patches
 .\gradlew.bat applyAllPatches          # Windows
 ./gradlew applyAllPatches              # Linux / macOS
 
-# ⚠️ REQUIRED: restore committed source modifications (lava fix + B_LINEAR/LINEAR_V2 region support)
+# REQUIRED: restore committed source modifications
 # applyAllPatches overwrites src/minecraft/java with decompiled sources — DO NOT SKIP this step!
-git checkout -- lightingluminol-server/src/minecraft/java/   # required on all platforms
+git checkout -- liahtina-server/src/minecraft/java/   # required on all platforms
 
 # Build the runnable Paperclip JAR
 .\gradlew.bat createPaperclipJar       # Windows
 ./gradlew createPaperclipJar           # Linux / macOS
 ```
 
-The `applyAllPatches` task will: pull upstream Paper 26.2 source via `paperRef` → apply `lightingluminol-api/paper-patches` → apply `lightingluminol-server/{paper,minecraft,luminol}-patches` → merge the Luminol core sources under `src/main/java` into the compile path.
+The `applyAllPatches` task will: pull upstream Paper 26.2 source via `paperRef` → apply `liahtina-api/paper-patches` → apply `liahtina-server/{paper,minecraft,luminol}-patches` → merge the core sources under `src/main/java` into the compile path.
 
-> **⚠️ Important** : `applyAllPatches` resets `lightingluminol-server/src/minecraft/java/` to the upstream decompiled sources. Any changes committed directly in that directory (lava damage fix, B_LINEAR / LINEAR_V2 region format support, etc.) will be lost. **You MUST run `git checkout -- lightingluminol-server/src/minecraft/java/` BEFORE `createPaperclipJar`**, otherwise the built JAR will be missing these modifications.
+> **Important** : `applyAllPatches` resets `liahtina-server/src/minecraft/java/` to the upstream decompiled sources. Any changes committed directly in that directory will be lost. **You MUST run `git checkout -- liahtina-server/src/minecraft/java/` BEFORE `createPaperclipJar`**, otherwise the built JAR will be missing these modifications.
 
 ### One-click Build
 
 ```bash
-# NOTE: the git checkout step CANNOT be skipped. Run each command separately as shown:
+# Run each command separately:
 .\gradlew.bat applyAllPatches
-git checkout -- lightingluminol-server/src/minecraft/java/
+git checkout -- liahtina-server/src/minecraft/java/
 .\gradlew.bat createPaperclipJar
 ```
 
@@ -134,8 +128,8 @@ git checkout -- lightingluminol-server/src/minecraft/java/
 | `applyAllPatches` | Apply all patches to the upstream source |
 | `createPaperclipJar` | Build the runnable Paperclip JAR (recommended for production) |
 | `createBundlerJar` | Build a Bundler JAR (includes all dependencies) |
-| `:lightingluminol-server:jar` | Compile and package server classes only (no dependencies) |
-| `:lightingluminol-server:compileJava` | Compile Java sources only (compile validation) |
+| `:liahtina-server:jar` | Compile and package server classes only (no dependencies) |
+| `:liahtina-server:compileJava` | Compile Java sources only (compile validation) |
 | `runPaperclip` | Spin up a test server directly |
 | `rebuildPatches` | Regenerate patch files from the current source |
 
@@ -144,7 +138,7 @@ git checkout -- lightingluminol-server/src/minecraft/java/
 The runnable Paperclip JAR is located at:
 
 ```
-lightingluminol-server/build/libs/lightingluminol-paperclip-26.2.0-R0.1-SNAPSHOT.jar
+liahtina-server/build/libs/liahtina-paperclip-26.2.0-R0.1-SNAPSHOT.jar
 ```
 
 ### Deploy & Run
@@ -152,19 +146,18 @@ lightingluminol-server/build/libs/lightingluminol-paperclip-26.2.0-R0.1-SNAPSHOT
 Rename the Paperclip JAR and drop it into your server directory:
 
 ```bash
-# Rename to the name expected by start.bat
-copy lightingluminol-paperclip-26.2.0-R0.1-SNAPSHOT.jar D:\SkyServer\lightingluminol-26.2.jar
+copy liahtina-paperclip-26.2.0-R0.1-SNAPSHOT.jar D:\SkyServer\liahtina-26.2.jar
 ```
 
 ```bat
 @echo off
-java -Xms1024M -Xmx1024M -jar lightingluminol-26.2.jar --nogui
+java -Xms1024M -Xmx1024M -jar liahtina-26.2.jar --nogui
 pause
 ```
 
 ### Patch System
 
-This project maintains three patch layers via Paperweight, all under `lightingluminol-server/`:
+This project maintains three patch layers via Paperweight, all under `liahtina-server/`:
 
 | Patch Directory | Count | Main Contents |
 |-----------------|-------|---------------|
@@ -178,7 +171,7 @@ This project maintains three patch layers via Paperweight, all under `lightinglu
 
 ## Configuration
 
-On first startup, the server automatically generates a `luminol_config/` configuration directory.
+On first startup, the server automatically generates a `liahtina_config/` configuration directory.
 
 ### Configuration Files
 
@@ -192,7 +185,7 @@ On first startup, the server automatically generates a `luminol_config/` configu
 
 ```yaml
 # Server brand name shown in F3 debug overlay
-name: LightingLuminol
+name: Liahtina
 # Force vanilla brand name (overrides plugins and this config)
 vanilla_spoof: false
 ```
@@ -233,25 +226,18 @@ This project is licensed under the **GNU General Public License v3.0**. See [LIC
 |-------------|------|
 | **EarthME** | Original Luminol project author |
 | **PaperMC** | Folia and Paper server framework |
-| **Arbor** | Luminol-based secondary development, providing feature reference and code porting |
-| **LightingLuminol** | Vanilla feature restoration layer |
-| **BakaSky** | BakaFork branch maintainer |
+| **Arbor** | Secondary development, providing feature reference and code porting |
+| **Liahtina** | Vanilla feature restoration layer |
+| **Flugobjekt** | Project maintainer |
 
 ---
 
 <div align="center">
-  <p><sub>Built by BakaSky -- Licensed under GPLv3</sub></p>
   <p>
-    <a href="https://github.com/Baka-Sky/LightingLuminol-Fork">Repository</a>
+    <a href="https://github.com/Flugobjekt/Liahtina">Repository</a>
     &nbsp;&middot;&nbsp;
-    <a href="https://github.com/Baka-Sky/LightingLuminol-Fork/issues">Issue Tracker</a>
+    <a href="https://github.com/Flugobjekt/Liahtina/issues">Issue Tracker</a>
     &nbsp;&middot;&nbsp;
-    <a href="https://github.com/Baka-Sky/LightingLuminol-Fork/releases">Releases</a>
+    <a href="https://github.com/Flugobjekt/Liahtina/releases">Releases</a>
   </p>
 </div>
-
----
-
-![Renegade Cow](public/image/renegadecow.png)
-
-**This Project has a Super Cow Power**

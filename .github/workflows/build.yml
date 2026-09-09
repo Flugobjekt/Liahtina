@@ -1,4 +1,4 @@
-name: Build LightingLuminol
+name: Build Liahtina
 
 on:
   push:
@@ -33,7 +33,7 @@ jobs:
         run: .\gradlew.bat applyAllPatches
 
       - name: Restore committed source modifications
-        run: git checkout -- lightingluminol-server/src/minecraft/java/
+        run: git checkout -- liahtina-server/src/minecraft/java/
 
       - name: Build Paperclip JAR
         run: .\gradlew.bat createPaperclipJar
@@ -41,5 +41,5 @@ jobs:
       - name: Upload JAR Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lightingluminol-paperclip
-          path: lightingluminol-server/build/libs/*.jar
+          name: liahtina-paperclip
+          path: liahtina-server/build/libs/*.jar

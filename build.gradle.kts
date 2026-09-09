@@ -14,13 +14,13 @@ paperweight {
         patchDir("paperApi") {
             upstreamPath = "paper-api"
             excludes = setOf("build.gradle.kts")
-            patchesDir = file("lightingluminol-api/paper-patches")
+            patchesDir = file("liahtina-api/paper-patches")
             outputDir = file("paper-api")
         }
         patchDir("paperServer") {
             upstreamPath = "paper-server"
             excludes = setOf("src/minecraft", "patches", "build.gradle.kts")
-            patchesDir = file("lightingluminol-server/paper-patches")
+            patchesDir = file("liahtina-server/paper-patches")
             outputDir = file("paper-server")
         }
     }

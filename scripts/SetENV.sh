@@ -4,8 +4,8 @@ prop() {
   sed -n "s/^[[:space:]]*${1}[[:space:]]*=[[:space:]]*//p" gradle.properties | head -n 1 | sed 's/[[:space:]]*$//; s/\r$//'
 }
 
-project_id="lightingluminol"
-project_id_b="LightingLuminol"
+project_id="liahtina"
+project_id_b="Liahtina"
 
 commitid=$(git log --pretty='%h' -1)
 mcversion=$(prop mcVersion)
@@ -20,7 +20,7 @@ else
 fi
 release_tag="$grdversion-$commitid"
 jarName="$project_id-$grdversion-paperclip.jar"
-libs_dir="lightingluminol-server/build/libs"
+libs_dir="liahtina-server/build/libs"
 jarName_dir="$libs_dir/$jarName"
 
 flag_push_repo=false

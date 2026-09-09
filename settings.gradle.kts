@@ -10,19 +10,19 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-rootProject.name = "lightingluminol"
+rootProject.name = "liahtina"
 
-include("lightingluminol-api")
-include("lightingluminol-server")
+include("liahtina-api")
+include("liahtina-server")
 
 gradle.lifecycle.beforeProject {
     val mcVersion = providers.gradleProperty("mcVersion").get().trim()
-    val lightingluminolVersionChannel = providers.gradleProperty("channel").get().trim()
-    val lightingluminolBuildNumber = providers.environmentVariable("BUILD_NUMBER").orNull?.trim()?.toInt()
-    val versionString = if (lightingluminolBuildNumber == null) {
+    val liahtinaVersionChannel = providers.gradleProperty("channel").get().trim()
+    val liahtinaBuildNumber = providers.environmentVariable("BUILD_NUMBER").orNull?.trim()?.toInt()
+    val versionString = if (liahtinaBuildNumber == null) {
         "$mcVersion.0-R0.1-SNAPSHOT"
     } else {
-        "$mcVersion.0-R0.1-build.$lightingluminolBuildNumber-${lightingluminolVersionChannel.lowercase()}"
+        "$mcVersion.0-R0.1-build.$liahtinaBuildNumber-${liahtinaVersionChannel.lowercase()}"
     }
     version = versionString
 }
