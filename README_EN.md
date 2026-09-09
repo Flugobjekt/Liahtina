@@ -46,6 +46,7 @@
 | **Perf** | SIMD Vectorization | Detects CPU SIMD support, auto-enables vectorized operations | Implemented |
 | **Perf** | CPU Affinity | Thread-to-core binding for big.LITTLE optimization | Implemented |
 | **Feature** | Tripwire Dupe | Configurable tripwire behavior (VANILLA20/21/MIXED) | Implemented |
+| **Feature** | Region Formats | Configurable chunk storage: MCA, Linear v2 (fixed bitmap), Linear v3 (header v4), Buffered Linear (B_LINEAR) | Implemented |
 | **Feature** | Portal Rate Limiter | Limits portal teleportations per tick | Implemented |
 | **Feature** | Command Block Toggle | Enable/disable command blocks via config | Implemented |
 | **Feature** | Disable Async Catchers | Disable Folia thread safety checks (experimental) | Implemented |
@@ -176,6 +177,37 @@ On first startup, the server automatically generates a `liahtina_config/` config
 | `server_mod_name.yml` | Server brand name displayed in the F3 debug screen |
 | `disable_check_for_folia_supported.yml` | Controls the Folia plugin support check bypass |
 | `folia_scheduler_compatibility.yml` | Controls scheduler routing for legacy plugins |
+| `config.toml` (`[function.region_format]`) | Region file format (`MCA`, `LINEAR_V2`, `LINEAR_V3`, `B_LINEAR`) and IO settings |
+
+### Example: `config.toml` (`[function.region_format]`)
+
+```toml
+[function.region_format]
+# Region file format to use for world saving:
+# - MCA: Standard Minecraft Anvil format (.mca)
+# - LINEAR_V2: Linear v2 with bucket compression and bitmap (.linear)
+# - LINEAR_V3: Linear v3 with reduced header overhead and direct bucket hashes (.linear)
+# - B_LINEAR: Buffered Linear region format with asynchronous flush (.b_linear)
+format = "MCA"
+
+# Compression level (1-22, default 1) for Linear and B_LINEAR
+linear_compression_level = 1
+
+# Flush delay in milliseconds (default 100) for Linear v2 / v3
+linear_io_flush_delay_ms = 100
+
+# Worker thread count (default 6) for Linear IO
+linear_io_thread_count = 6
+
+# Use virtual threads for Linear IO
+linear_use_virtual_thread = true
+
+# Flush delay in milliseconds (default 3000) for B_LINEAR
+blinear_io_flush_delay_ms = 3000
+
+# Worker thread count (default 6) for B_LINEAR
+blinear_io_thread_count = 6
+```
 
 ### Example: `server_mod_name.yml`
 
