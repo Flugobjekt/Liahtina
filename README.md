@@ -1,6 +1,4 @@
 <div align="center">
-  <img src="./public/image/Liahtina_LL_wide_white.png" alt="Liahtina Logo" width="400">
-
   <h1>Liahtina</h1>
   <p><strong>A high-performance fork of Folia</strong></p>
   <p>Tracking Mojang's latest Minecraft versions with Bukkit plugin compatibility and vanilla feature restoration</p>
@@ -20,8 +18,6 @@
 > The original Luminol project was developed by **EarthME**, but was archived due to personal reasons. This version aims to adapt to Mojang's latest Minecraft versions.
 >
 > Due to the **GNU GPL V3.0** open source license requirements, any modifications, derivatives, or distributions based on this project must be released under the same open source license in full.
->
-> **CanvasMC** -- we will never forget.
 
 ---
 
