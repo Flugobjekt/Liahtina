@@ -30,6 +30,7 @@ public class RegionFormatConfig {
             case "B_LINEAR":
                 regionFormat = EnumRegionFormat.B_LINEAR;
                 break;
+            case "LINEAR_V3":
             case "LINEAR_V2":
             case "LINEAR":
                 regionFormat = EnumRegionFormat.LINEAR_V2;

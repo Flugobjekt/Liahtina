@@ -40,7 +40,8 @@ public final class ConfigLoader {
         try {
             List<String> lines = Files.readAllLines(configPath, StandardCharsets.UTF_8);
             parseConfig(lines);
-            LOGGER.info("Successfully loaded Liahtina config");
+            zone.little.arbor.config.modules.function.RegionFormatConfig.onLoaded();
+            LOGGER.info("Successfully loaded Liahtina config, region format: " + zone.little.arbor.config.modules.function.RegionFormatConfig.regionFormat);
         } catch (IOException e) {
             LOGGER.severe("Failed to load Liahtina config: " + e.getMessage());
         }
@@ -204,20 +205,30 @@ public final class ConfigLoader {
                 "\tupdate_interval_ticks = 15\n" +
                 "\n" +
                 "[function.region_format]\n" +
-                "\t#Decides the compression level of the region file(Only works for LINEAR_V2 and B_LINEAR)\n" +
-                "\tlinear_compression_level = 1\n" +
-                "\t#Decides when it will be flushed to the region file when it has been marked to save for n(default is 100) milliseconds(Only works for LINEAR_V2)\n" +
-                "\tlinear_io_flush_delay_ms = 100\n" +
-                "\t#Decides when it will be flushed to the region file when there has been no write operations for n(default is 3000) milliseconds(Only works for B_LINEAR)\n" +
-                "\tblinear_io_flush_delay_ms = 3000\n" +
-                "\t#Decides the worker thread count of linear(Only works for LINEAR_V2)\n" +
-                "\tlinear_io_thread_count = 6\n" +
-                "\t#Decides the worker thread count of buffered linear(Only works for B_LINEAR)\n" +
-                "\tblinear_io_thread_count = 6\n" +
-                "\t#Available choices: MCA, B_LINEAR, LINEAR_V2\n" +
+                "\t# Region file format to use for world saving.\n" +
+                "\t# Available choices: MCA, LINEAR_V2, LINEAR_V3, LINEAR, B_LINEAR\n" +
+                "\t# - MCA: Standard Minecraft Anvil format (.mca)\n" +
+                "\t# - LINEAR_V2 / LINEAR_V3 / LINEAR: Linear region format (header version 3 specification with bucket compression, .linear)\n" +
+                "\t# - B_LINEAR: Buffered Linear region format with asynchronous flush (.b_linear)\n" +
                 "\tformat = \"MCA\"\n" +
-                "\t#Decides if it could use virtual threads for linear format(Only works for LINEAR_V2)\n" +
+                "\t# Decides the compression level of the region file (1-22, default is 1)\n" +
+                "\t# Only works for Linear and B_LINEAR\n" +
+                "\tlinear_compression_level = 1\n" +
+                "\t# Flush delay in milliseconds after region file is marked to save (default is 100)\n" +
+                "\t# Only works for Linear\n" +
+                "\tlinear_io_flush_delay_ms = 100\n" +
+                "\t# Worker thread count for Linear region IO (default is 6)\n" +
+                "\t# Only works for Linear\n" +
+                "\tlinear_io_thread_count = 6\n" +
+                "\t# Whether to use Java virtual threads for Linear region IO (default is true)\n" +
+                "\t# Only works for Linear\n" +
                 "\tlinear_use_virtual_thread = true\n" +
+                "\t# Flush delay in milliseconds when there have been no write operations (default is 3000)\n" +
+                "\t# Only works for B_LINEAR\n" +
+                "\tblinear_io_flush_delay_ms = 3000\n" +
+                "\t# Worker thread count for Buffered Linear region IO (default is 6)\n" +
+                "\t# Only works for B_LINEAR\n" +
+                "\tblinear_io_thread_count = 6\n" +
                 "\n" +
                 "[function.tpsbar]\n" +
                 "\tping_color_list = [\"GREEN\", \"YELLOW\", \"RED\", \"PURPLE\"]\n" +
