@@ -1,0 +1,3 @@
+## 2024-05-24 - [Replaced ObjectArraySet with ConcurrentHashMap.newKeySet() in BufferedLinearRegionFileFlusher]
+**Learning:** The previous implementation used an ObjectArraySet and synchronized blocks, copying the entire array every 20ms during iteration, which caused high GC overhead and lock contention. ConcurrentHashMap.newKeySet() provides a lock-free, concurrent set with weakly consistent iterators, which is much more performant for frequent read/iteration scenarios.
+**Action:** Use concurrent data structures (like ConcurrentHashMap) instead of synchronized block + array copying for frequently iterated, highly concurrent data collections.

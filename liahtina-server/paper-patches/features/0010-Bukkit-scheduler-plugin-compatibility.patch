@@ -5,7 +5,7 @@ Subject: [PATCH] Bukkit scheduler plugin compatibility
 
 
 diff --git a/src/main/java/io/papermc/paper/plugin/provider/type/paper/PaperPluginProviderFactory.java b/src/main/java/io/papermc/paper/plugin/provider/type/paper/PaperPluginProviderFactory.java
-index 0000000000000000000000000000000000000000..0000000000000000000000000000000000000000 100644
+index 6369b13e1fcdbdb25dd9d6e4d3bffdedbee4f739..0a27b468560ccf4b9588cd12d50c02e442f3024f 100644
 --- a/src/main/java/io/papermc/paper/plugin/provider/type/paper/PaperPluginProviderFactory.java
 +++ b/src/main/java/io/papermc/paper/plugin/provider/type/paper/PaperPluginProviderFactory.java
 @@ -24,11 +24,6 @@ class PaperPluginProviderFactory implements PluginTypeFactory<PaperPluginParent,
@@ -21,7 +21,7 @@ index 0000000000000000000000000000000000000000..00000000000000000000000000000000
          ComponentLogger logger = ComponentLogger.logger(jul.getName());
          PluginProviderContext context = PluginProviderContextImpl.create(configuration, logger, source);
 diff --git a/src/main/java/io/papermc/paper/plugin/provider/type/spigot/SpigotPluginProviderFactory.java b/src/main/java/io/papermc/paper/plugin/provider/type/spigot/SpigotPluginProviderFactory.java
-index 0000000000000000000000000000000000000000..0000000000000000000000000000000000000000 100644
+index 6ef0042a355c65262bdb89dcf151bd644653216d..b8d0440e15348f69996ef6d8217e7f9902389709 100644
 --- a/src/main/java/io/papermc/paper/plugin/provider/type/spigot/SpigotPluginProviderFactory.java
 +++ b/src/main/java/io/papermc/paper/plugin/provider/type/spigot/SpigotPluginProviderFactory.java
 @@ -26,11 +26,6 @@ class SpigotPluginProviderFactory implements PluginTypeFactory<SpigotPluginProvi
@@ -37,7 +37,7 @@ index 0000000000000000000000000000000000000000..00000000000000000000000000000000
          // Spigot doesn't validate the name when the config is created, and instead when the plugin is loaded.
          // Paper plugin configuration will do these checks in config serializer instead of when this is created.
 diff --git a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
-index 0000000000000000000000000000000000000000..0000000000000000000000000000000000000000 100644
+index c4dcddc4db02ed3641d05fae31ead7c13205f841..f3c9531af820b6c2cc8c386ef19d68f7e80b3c90 100644
 --- a/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
 +++ b/src/main/java/org/bukkit/craftbukkit/scheduler/CraftScheduler.java
 @@ -514,15 +514,23 @@ public class CraftScheduler implements BukkitScheduler {
@@ -67,7 +67,7 @@ index 0000000000000000000000000000000000000000..00000000000000000000000000000000
      }
  
 diff --git a/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java b/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
-index 0000000000000000000000000000000000000000..0000000000000000000000000000000000000000 100644
+index 55a095e00bfe15321d8a1d69beb232e9956b0df7..3ac6c7571a204b0d48995945985a252a495920d6 100644
 --- a/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
 +++ b/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
 @@ -322,12 +322,6 @@ public final class CraftMagicNumbers implements UnsafeValues {

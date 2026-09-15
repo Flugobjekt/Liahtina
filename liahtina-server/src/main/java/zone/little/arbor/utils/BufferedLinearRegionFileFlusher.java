@@ -2,8 +2,6 @@ package zone.little.arbor.utils;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.logging.LogUtils;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import zone.little.arbor.data.BufferedLinearRegionFile;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -16,7 +14,8 @@ import java.util.concurrent.*;
 public class BufferedLinearRegionFileFlusher implements Runnable {
     private static final Logger logger = LogUtils.getLogger();
 
-    private final Set<BufferedLinearRegionFile> inManagement = new ObjectArraySet<>();
+    // Bolt: Use concurrent set to avoid synchronized blocks and array copying every tick
+    private final Set<BufferedLinearRegionFile> inManagement = ConcurrentHashMap.newKeySet();
     private final ScheduledFuture<?> flusherChecker;
     private final Executor ioWorkerPool;
     private final long flushOfWriteTimeoutMs;
@@ -57,14 +56,9 @@ public class BufferedLinearRegionFileFlusher implements Runnable {
     @Override
     public void run() {
         final long currentNanos = System.nanoTime();
-        final BufferedLinearRegionFile[] copied;
 
-        synchronized (this) {
-            copied = this.inManagement.toArray(new BufferedLinearRegionFile[0]);
-        }
-
-        final List<BufferedLinearRegionFile> toRemove = new ObjectArrayList<>();
-        for (BufferedLinearRegionFile file : copied) {
+        // Bolt: Iterate directly over the concurrent set without array copy/synchronized
+        for (BufferedLinearRegionFile file : this.inManagement) {
             // try acquiring the read lock
             if (!file.softReadLock()) {
                 // if the read lock is unacquirable, it might mean there is another operations is processing(might be a writing operation)
@@ -82,7 +76,8 @@ public class BufferedLinearRegionFileFlusher implements Runnable {
 
             if (closed) {
                 // add to pending remove list so that we could clean the closed file correctly
-                toRemove.add(file);
+                // Bolt: Remove directly since we're using a concurrent set
+                this.inManagement.remove(file);
                 continue;
             }
 
@@ -110,24 +105,15 @@ public class BufferedLinearRegionFileFlusher implements Runnable {
                 });
             }
         }
-
-        synchronized (this) {
-            // clean closed files
-            for (BufferedLinearRegionFile file : toRemove) {
-                this.inManagement.remove(file);
-            }
-        }
     }
 
     public void removeFile(BufferedLinearRegionFile fileToRemove) {
-        synchronized (this) {
-            this.inManagement.remove(fileToRemove);
-        }
+        // Bolt: Remove directly without synchronized
+        this.inManagement.remove(fileToRemove);
     }
 
     public void addFile(BufferedLinearRegionFile fileToAdd) {
-        synchronized (this) {
-            this.inManagement.add(fileToAdd);
-        }
+        // Bolt: Add directly without synchronized
+        this.inManagement.add(fileToAdd);
     }
 }

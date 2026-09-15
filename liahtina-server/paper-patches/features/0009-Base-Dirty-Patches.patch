@@ -5,10 +5,10 @@ Subject: [PATCH] Base Dirty Patches
 
 
 diff --git a/src/main/java/ca/spottedleaf/moonrise/common/list/ReferenceList.java b/src/main/java/ca/spottedleaf/moonrise/common/list/ReferenceList.java
-index 2e876b918672e8ef3b5197b7e6b1597247fdeaa1..6c4e25e5e21044c0fa9728e475b28f6478783037 100644
+index 2e876b918672e8ef3b5197b7e6b1597247fdeaa1..5d76b240a24c61cad8fb7eaf3ae0a30e44d6d5a1 100644
 --- a/src/main/java/ca/spottedleaf/moonrise/common/list/ReferenceList.java
 +++ b/src/main/java/ca/spottedleaf/moonrise/common/list/ReferenceList.java
-@@ -36,7 +36,7 @@ public final class ReferenceList<E> implements Iterable<E> {
+@@ -33,7 +33,7 @@ public final class ReferenceList<E> implements Iterable<E> {
          return new ReferenceList<>(this.references.clone(), this.count, this.referenceToIndex.clone());
      }
  
@@ -17,7 +17,7 @@ index 2e876b918672e8ef3b5197b7e6b1597247fdeaa1..6c4e25e5e21044c0fa9728e475b28f64
          return this.count;
      }
  
-@@ -40,7 +40,7 @@ public final class ReferenceList<E> implements Iterable<E> {
+@@ -41,7 +41,7 @@ public final class ReferenceList<E> implements Iterable<E> {
          return this.referenceToIndex.containsKey(obj);
      }
  
@@ -26,7 +26,7 @@ index 2e876b918672e8ef3b5197b7e6b1597247fdeaa1..6c4e25e5e21044c0fa9728e475b28f64
          final int index = this.referenceToIndex.removeInt(obj);
          if (index == Integer.MIN_VALUE) {
              return false;
-@@ -63,7 +63,7 @@ public final class ReferenceList<E> implements Iterable<E> {
+@@ -81,14 +81,14 @@ public final class ReferenceList<E> implements Iterable<E> {
          return true;
      }
  
@@ -35,7 +35,6 @@ index 2e876b918672e8ef3b5197b7e6b1597247fdeaa1..6c4e25e5e21044c0fa9728e475b28f64
          if (index < 0 || index >= this.count) {
              throw new IndexOutOfBoundsException("Index: " + index + " is out of bounds, size: " + this.count);
          }
-@@ -70,7 +70,7 @@ public final class ReferenceList<E> implements Iterable<E> {
          return this.references[index];
      }
  
@@ -44,7 +43,7 @@ index 2e876b918672e8ef3b5197b7e6b1597247fdeaa1..6c4e25e5e21044c0fa9728e475b28f64
          return this.references[index];
      }
  
-@@ -103,7 +103,7 @@ public final class ReferenceList<E> implements Iterable<E> {
+@@ -100,7 +100,7 @@ public final class ReferenceList<E> implements Iterable<E> {
          return this.references;
      }
  

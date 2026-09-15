@@ -5,7 +5,7 @@ Subject: [PATCH] Make command blocks honor Luminol config
 
 
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index c6434ff2e5c211887c2e98c8462a49e0e1cb5b21..ab0a06ec31e0fa4741ba0c4368d3b9e0b586af83 100644
+index c6434ff2e5c211887c2e98c8462a49e0e1cb5b21..c8d3e98164c82e6011b6b99f64ab43b4e7fff29d 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
 @@ -2960,7 +2960,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
