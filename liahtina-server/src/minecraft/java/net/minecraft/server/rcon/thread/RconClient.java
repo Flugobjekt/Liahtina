@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Locale;
 import net.minecraft.server.ServerInterface;
 import net.minecraft.server.rcon.PktUtils;
@@ -83,7 +84,7 @@ public class RconClient extends GenericThread {
                         case 3:
                             String password = PktUtils.stringFromByteArray(this.buf, offset, read);
                             offset += password.length();
-                            if (!password.isEmpty() && password.equals(this.rconPassword)) {
+                            if (!password.isEmpty() && MessageDigest.isEqual(password.getBytes(StandardCharsets.UTF_8), this.rconPassword.getBytes(StandardCharsets.UTF_8))) {
                                 this.authed = true;
                                 this.send(requestid, 2, "");
                                 break;
