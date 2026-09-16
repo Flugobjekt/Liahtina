@@ -5,7 +5,7 @@ Subject: [PATCH] Rebrand to Liahtina
 
 
 diff --git a/src/main/java/com/destroystokyo/paper/Metrics.java b/src/main/java/com/destroystokyo/paper/Metrics.java
-index 08745a35b1ce8cc56d970472088de3cd17b9e43a..c1561e5063962736653d72ba9a8a9d6108fc5c9a 100644
+index 08745a35b1ce8cc56d970472088de3cd17b9e43a..0609ee7852dbc97dc1252ff1d6633affa32e36b6 100644
 --- a/src/main/java/com/destroystokyo/paper/Metrics.java
 +++ b/src/main/java/com/destroystokyo/paper/Metrics.java
 @@ -593,7 +593,7 @@ public class Metrics {
@@ -32,7 +32,7 @@ index 08745a35b1ce8cc56d970472088de3cd17b9e43a..c1561e5063962736653d72ba9a8a9d61
                  metrics.addCustomChart(new Metrics.DrilldownPie("java_version", () -> {
                      Map<String, Map<String, Integer>> map = new HashMap<>();
 diff --git a/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java b/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
-index 30815c8970b1f1c88a3c7bb5fd36efd915f1687d..a24b2e189be8c9cdcd4fda593d2eec18fa04f094 100644
+index 30815c8970b1f1c88a3c7bb5fd36efd915f1687d..2ef903261b9f73386b5866f75b792388802a20c9 100644
 --- a/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
 +++ b/src/main/java/com/destroystokyo/paper/PaperVersionFetcher.java
 @@ -40,8 +40,8 @@ public class PaperVersionFetcher implements VersionFetcher {
@@ -74,7 +74,7 @@ index 30815c8970b1f1c88a3c7bb5fd36efd915f1687d..a24b2e189be8c9cdcd4fda593d2eec18
              connection.setConnectTimeout(5000);
              connection.setReadTimeout(5000);
 diff --git a/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java b/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java
-index 10a0be7a4db1a51579d113d279af7a9effe7f438..db3362f68188871fa016fdef699b74a9d53b42ad 100644
+index 10a0be7a4db1a51579d113d279af7a9effe7f438..25dc28c79c11b7ff60e3207c3db97a99cb09244a 100644
 --- a/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java
 +++ b/src/main/java/io/papermc/paper/ServerBuildInfoImpl.java
 @@ -32,6 +32,7 @@ public record ServerBuildInfoImpl(
